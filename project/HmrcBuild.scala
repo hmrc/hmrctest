@@ -76,9 +76,9 @@ object POMMetadata {
           </license>
         </licenses>
         <scm>
-          <connection>scm:git@github.tools.tax.service.gov.uk:HMRC/domain.git</connection>
-          <developerConnection>scm:git@github.tools.tax.service.gov.uk:HMRC/domain.git</developerConnection>
-          <url>git@github.tools.tax.service.gov.uk:HMRC/domain.git</url>
+          <connection>scm:git@github.com:hmrc/hmrctest.git</connection>
+          <developerConnection>scm:git@github.com:hmrc/hmrctest.git</developerConnection>
+          <url>git@github.com:hmrc/hmrctest.git</url>
         </scm>
         <developers>
           <developer>
