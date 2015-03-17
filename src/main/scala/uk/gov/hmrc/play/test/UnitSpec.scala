@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.hmrc.play.test
 
 import org.scalatest.{OptionValues, WordSpecLike, Matchers}
@@ -55,4 +56,3 @@ trait UnitSpec extends WordSpecLike with Matchers with OptionValues {
     resultF.map(bodyOf)
   }
 }
-
