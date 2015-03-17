@@ -10,5 +10,7 @@ In order to use the classes from the `uk.gov.hmrc.play.it` package, you need to 
 Include the following dependency in your SBT build
 
 ```scala
+resolvers += Resolver.bintrayRepo("hmrc", "releases")
+
 libraryDependencies += "uk.gov.hmrc" %% "hmrctest" % "1.0.0" % "test"
 ```
