@@ -87,29 +87,9 @@ object POMMetadata {
             <url>http://www.equalexperts.com</url>
           </developer>
           <developer>
-            <id>jakobgrunig</id>
-            <name>Jakob Grunig</name>
-            <url>http://www.equalexperts.com</url>
-          </developer>
-          <developer>
             <id>xnejp03</id>
             <name>Petr Nejedly</name>
             <url>http://www.equalexperts.com</url>
-          </developer>
-          <developer>
-            <id>vaughansharman</id>
-            <name>Vaughan Sharman</name>
-            <url>http://www.equalexperts.com</url>
-          </developer>
-          <developer>
-            <id>davesammut</id>
-            <name>Dave Sammut</name>
-            <url>http://www.equalexperts.com</url>
-          </developer>
-          <developer>
-            <id>howyp</id>
-            <name>Howard Perrin</name>
-            <url>http://www.zuhlke.co.uk</url>
           </developer>
         </developers>
   }
