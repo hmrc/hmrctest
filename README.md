@@ -1,5 +1,6 @@
 hmrctest
 ========
+[ ![Download](https://api.bintray.com/packages/hmrc/releases/hmrctest/images/download.svg) ](https://bintray.com/hmrc/releases/hmrctest/_latestVersion)
 
 hmrctest is a Scala library providing some useful functionality for unit and integration tests.
 
@@ -12,5 +13,5 @@ Include the following dependency in your SBT build
 ```scala
 resolvers += Resolver.bintrayRepo("hmrc", "releases")
 
-libraryDependencies += "uk.gov.hmrc" %% "hmrctest" % "1.0.0" % "test"
+libraryDependencies += "uk.gov.hmrc" %% "hmrctest" % "x.x.x" % "test"
 ```
