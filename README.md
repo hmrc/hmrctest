@@ -1,6 +1,6 @@
 hmrctest
 ========
-[ ![Download](https://api.bintray.com/packages/hmrc/releases/hmrctest/images/download.svg) ](https://bintray.com/hmrc/releases/hmrctest/_latestVersion)
+[![Build Status](https://travis-ci.org/hmrc/hmrctest.svg)](https://travis-ci.org/hmrc/hmrctest) [ ![Download](https://api.bintray.com/packages/hmrc/releases/hmrctest/images/download.svg) ](https://bintray.com/hmrc/releases/hmrctest/_latestVersion)
 
 hmrctest is a Scala library providing some useful functionality for unit and integration tests.
 
