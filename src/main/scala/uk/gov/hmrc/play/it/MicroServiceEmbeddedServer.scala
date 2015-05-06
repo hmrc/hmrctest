@@ -85,8 +85,8 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
         (s"Dev.microservice.services.$serviceName.port" -> new Integer(port)) +
         (s"Dev.microservice.services.$serviceName.host" -> "localhost")
 
-      updatedMap ++ additionalConfig
-    })
+      updatedMap
+    }) ++ additionalConfig
 
     val configMapUpdated = onConfigUpdating(configMap)
     val config: Configuration = play.api.Configuration.from(configMapUpdated)
