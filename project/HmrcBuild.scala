@@ -25,7 +25,7 @@ object HmrcBuild extends Build {
   import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 
   val appName = "hmrctest"
-  val appVersion = "1.2.0-SNAPSHOT"
+  val appVersion = "1.2.0"
 
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(AutomateHeaderPlugin)
