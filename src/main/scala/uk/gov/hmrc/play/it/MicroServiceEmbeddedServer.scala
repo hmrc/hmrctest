@@ -25,6 +25,8 @@ import play.core.TestApplication
 import play.core.server.NettyServer
 import uk.gov.hmrc.play.it.servicemanager.ServiceManagerClient
 
+import scala.concurrent.duration._
+
 trait ExternalServicesServer extends IntegrationTestConfiguration with ExternalServiceOrchestrator
 
 trait MicroServiceEmbeddedServer extends ExternalServicesServer with EmbeddedServiceOrchestrator
@@ -49,7 +51,9 @@ trait ExternalServiceOrchestrator extends StartAndStopServer {
   import uk.gov.hmrc.play.it.SafelyStop._
   import uk.gov.hmrc.play.it.UrlHelper._
 
-  protected lazy val externalServicePorts = ServiceManagerClient.start(testId, externalServices)
+  protected def startTimeout: Duration = 60.seconds
+
+  protected lazy val externalServicePorts = ServiceManagerClient.start(testId, externalServices, startTimeout)
 
   override def start() {
     externalServicePorts
