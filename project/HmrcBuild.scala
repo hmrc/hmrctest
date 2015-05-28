@@ -15,6 +15,8 @@
  */
 import sbt._
 import sbt.Keys._
+import uk.gov.hmrc.SbtAutoBuildPlugin
+import uk.gov.hmrc.versioning.SbtGitVersioning
 
 object HmrcBuild extends Build {
 
@@ -25,29 +27,18 @@ object HmrcBuild extends Build {
   import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 
   val appName = "hmrctest"
-  val appVersion = "1.3.0-SNAPSHOT"
 
   lazy val microservice = Project(appName, file("."))
-    .enablePlugins(AutomateHeaderPlugin)
-    .settings(version := appVersion)
-    .settings(scalaSettings : _*)
-    .settings(defaultSettings() : _*)
+    .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning)
     .settings(
       targetJvm := "jvm-1.7",
-      shellPrompt := ShellPrompt(appVersion),
       libraryDependencies ++= AppDependencies(),
       crossScalaVersions := Seq("2.11.6"),
       resolvers := Seq(
-        Opts.resolver.sonatypeReleases,
-        Opts.resolver.sonatypeSnapshots,
-        "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/",
-        "typesafe-snapshots" at "http://repo.typesafe.com/typesafe/snapshots/"
+        Resolver.bintrayRepo("hmrc", "releases"),
+        "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/"
       )
     )
-    .settings(publishAllArtefacts: _*)
-    .settings(SbtBuildInfo(): _*)
-    .settings(POMMetadata(): _*)
-    .settings(HeaderSettings())
 }
 
 private object AppDependencies {
@@ -65,44 +56,4 @@ private object AppDependencies {
   )
 
   def apply() = compile
-}
-object POMMetadata {
-
-  def apply() = {
-    pomExtra :=
-      <url>https://www.gov.uk/government/organisations/hm-revenue-customs</url>
-        <licenses>
-          <license>
-            <name>Apache 2</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          </license>
-        </licenses>
-        <scm>
-          <connection>scm:git@github.com:hmrc/hmrctest.git</connection>
-          <developerConnection>scm:git@github.com:hmrc/hmrctest.git</developerConnection>
-          <url>git@github.com:hmrc/hmrctest.git</url>
-        </scm>
-        <developers>
-          <developer>
-            <id>duncancrawford</id>
-            <name>Duncan Crawford</name>
-            <url>http://www.equalexperts.com</url>
-          </developer>
-          <developer>
-            <id>xnejp03</id>
-            <name>Petr Nejedly</name>
-            <url>http://www.equalexperts.com</url>
-          </developer>
-        </developers>
-  }
-}
-
-
-object HeaderSettings {
-
-  import org.joda.time.DateTime
-  import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport._
-  import de.heikoseeberger.sbtheader.license.Apache2_0
-
-  def apply() = headers := Map("scala" -> Apache2_0(DateTime.now().getYear.toString, "HM Revenue & Customs"))
 }
