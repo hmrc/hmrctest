@@ -55,11 +55,15 @@ object ServiceManagerClient {
         .post(Json.toJson(ServiceManagementStartRequest(testId.toString, externalServices)))
         .map { response: WSResponse =>
 
-          val servicePorts: Seq[ServiceManagementResponse] = response.json.validate[Seq[ServiceManagementResponse]].fold(
+          if (response.status >= 200 && response.status <= 299) {
+            val servicePorts: Seq[ServiceManagementResponse] = response.json.validate[Seq[ServiceManagementResponse]].fold(
             errs => throw new JsException("POST", serviceManagerStartUrl, response.body, classOf[Seq[ServiceManagementResponse]], errs),
             valid => valid)
 
-          servicePorts.map(s => s.serviceName -> s.port).toMap
+            servicePorts.map(s => s.serviceName -> s.port).toMap
+          } else {
+            throw new RuntimeException(s"Received unexpected response from ServiceManager: ${response.status}\n\n" + response.body )
+          }
       }
 
       Await.result(f.andThen { case _ => extendedTimeoutClient.close() }, 5.minutes)
