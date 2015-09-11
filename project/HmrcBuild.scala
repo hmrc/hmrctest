@@ -33,7 +33,7 @@ object HmrcBuild extends Build {
     .settings(
       targetJvm := "jvm-1.7",
       libraryDependencies ++= AppDependencies(),
-      crossScalaVersions := Seq("2.11.6"),
+      crossScalaVersions := Seq("2.11.7"),
       resolvers := Seq(
         Resolver.bintrayRepo("hmrc", "releases"),
         "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/"
@@ -51,6 +51,7 @@ private object AppDependencies {
 
     "org.scalatest" %% "scalatest" % "2.2.4",
     "com.typesafe.play" %% "play-test" % PlayVersion.current,
+    "ch.qos.logback" % "logback-classic" % "1.1.2",
     "org.pegdown" % "pegdown" % "1.5.0"
 
   )
