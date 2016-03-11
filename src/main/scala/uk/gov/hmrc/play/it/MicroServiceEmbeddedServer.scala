@@ -76,6 +76,8 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
   import uk.gov.hmrc.play.it.SafelyStop._
   import uk.gov.hmrc.play.it.UrlHelper._
 
+  def playMode = Mode.Dev
+
   protected val servicePort: Int = Port.randomAvailable
 
   private lazy val server = {
@@ -95,7 +97,8 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
     val configMapUpdated = onConfigUpdating(configMap)
     val config: Configuration = play.api.Configuration.from(configMapUpdated)
 
-    val application = new DefaultApplication(new File("."), this.getClass.getClassLoader, None, Mode.Dev) {
+
+    val application = new DefaultApplication(new File("."), this.getClass.getClassLoader, None, playMode) {
       override def configuration: Configuration = super.configuration ++ config
     }
 
