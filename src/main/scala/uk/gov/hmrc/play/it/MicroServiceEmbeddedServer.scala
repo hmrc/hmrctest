@@ -42,6 +42,7 @@ trait IntegrationTestConfiguration {
   protected def additionalConfig: Map[String, _ <: Any] = Map.empty
 
   protected val testId = TestId(testName)
+  protected def applicationMode = Mode.Dev
 }
 
 trait ExternalServiceOrchestrator extends StartAndStopServer {
@@ -76,8 +77,6 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
   import uk.gov.hmrc.play.it.SafelyStop._
   import uk.gov.hmrc.play.it.UrlHelper._
 
-  def playMode = Mode.Dev
-
   protected val servicePort: Int = Port.randomAvailable
 
   private lazy val server = {
@@ -88,8 +87,8 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
       Logger.debug(s"External service '$serviceName' is running on port: $port")
 
       val updatedMap = map +
-        (s"Dev.microservice.services.$serviceName.port" -> new Integer(port)) +
-        (s"Dev.microservice.services.$serviceName.host" -> "localhost")
+        (s"$applicationMode.microservice.services.$serviceName.port" -> new Integer(port)) +
+        (s"$applicationMode.microservice.services.$serviceName.host" -> "localhost")
 
       updatedMap
     }) ++ additionalConfig
@@ -98,7 +97,7 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
     val config: Configuration = play.api.Configuration.from(configMapUpdated)
 
 
-    val application = new DefaultApplication(new File("."), this.getClass.getClassLoader, None, playMode) {
+    val application = new DefaultApplication(new File("."), this.getClass.getClassLoader, None, applicationMode) {
       override def configuration: Configuration = super.configuration ++ config
     }
 
@@ -141,7 +140,7 @@ trait MongoTestConfiguration extends AdditionalConfigProvider {
   val dbName: String = testId.toString
 
   abstract override protected def additionalConfig =
-    super.additionalConfig + (s"Dev.microservice.mongodb.uri" -> s"mongodb://localhost:27017/$dbName")
+    super.additionalConfig + (s"$applicationMode.microservice.mongodb.uri" -> s"mongodb://localhost:27017/$dbName")
 }
 
 object UrlHelper {
