@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.play.it.servicemanager
 
-import com.ning.http.client.{AsyncHttpClient, AsyncHttpClientConfig}
+import org.asynchttpclient.DefaultAsyncHttpClientConfig
 import play.api.libs.json.Json
-import play.api.libs.ws.ning.{NingAsyncHttpClientConfigBuilder, NingWSClient}
-import play.api.libs.ws.{DefaultWSClientConfig, WS, WSResponse}
+import play.api.libs.ws.ahc.AhcWSClient
+import play.api.libs.ws.{WS, WSResponse}
 import uk.gov.hmrc.play.it.{ExternalService, TestId}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,21 +37,21 @@ object ServiceManagerClient {
   implicit val stopRequestFormat = Json.format[ServiceManagementStopRequest]
   implicit val responseFormat = Json.format[ServiceManagementResponse]
   implicit val versionEnvironmentVariableFormat = Json.format[VersionEnvironmentVariable]
-  implicit lazy val client = new NingWSClient(new AsyncHttpClient().getConfig)
+  implicit lazy val client = new AhcWSClient(new DefaultAsyncHttpClientConfig.Builder().build)
 
   def start(testId: TestId, externalServices: Seq[ExternalService], timeout: Duration): Map[String, Int] = {
 
     if (externalServices.isEmpty)
       Map.empty
     else {
-      val extendedTimeoutClient = new NingWSClient({
-        val builder = new AsyncHttpClientConfig.Builder(new NingAsyncHttpClientConfigBuilder(new DefaultWSClientConfig()).build())
-        builder.setIdleConnectionTimeoutInMs(timeout.toMillis.toInt)
+      val extendedTimeoutClient = new AhcWSClient({
+        val builder = new DefaultAsyncHttpClientConfig.Builder()
+        builder.setPooledConnectionIdleTimeout(timeout.toMillis.toInt)
         builder.build()
       })
 
       val f = WS.clientUrl(serviceManagerStartUrl)(extendedTimeoutClient)
-        .withRequestTimeout(timeout.toMillis.toInt)
+        .withRequestTimeout(timeout)
         .post(Json.toJson(ServiceManagementStartRequest(testId.toString, externalServices)))
         .map { response: WSResponse =>
 
