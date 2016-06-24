@@ -16,22 +16,14 @@
 
 package uk.gov.hmrc.play.it
 
-import java.io.File
-
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeUtils, DateTimeZone}
 import play.api._
-import play.core.TestApplication
-import play.core.server.NettyServer
 import uk.gov.hmrc.play.it.servicemanager.ServiceManagerClient
 
 import scala.concurrent.duration._
 
 trait ExternalServicesServer extends IntegrationTestConfiguration with ExternalServiceOrchestrator
-
-trait MicroServiceEmbeddedServer extends ExternalServicesServer with EmbeddedServiceOrchestrator
-
-trait MongoMicroServiceEmbeddedServer extends MicroServiceEmbeddedServer with MongoTestConfiguration
 
 trait IntegrationTestConfiguration {
 
@@ -68,65 +60,6 @@ trait ExternalServiceOrchestrator extends StartAndStopServer {
     val port = externalServicePorts.getOrElse(serviceName, throw new IllegalArgumentException(s"Unknown service '$serviceName'"))
     s"http://localhost:$port/${-/(path)}"
   }
-}
-
-trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServer {
-
-  self: IntegrationTestConfiguration with ExternalServiceOrchestrator =>
-
-  import uk.gov.hmrc.play.it.SafelyStop._
-  import uk.gov.hmrc.play.it.UrlHelper._
-
-  protected val servicePort: Int = Port.randomAvailable
-
-  private lazy val server = {
-
-    val configMap = externalServicePorts.foldLeft(Map.empty[String, Any])((map, servicePort) => {
-      val serviceName = servicePort._1
-      val port = servicePort._2
-      Logger.debug(s"External service '$serviceName' is running on port: $port")
-
-      val updatedMap = map +
-        (s"$applicationMode.microservice.services.$serviceName.port" -> new Integer(port)) +
-        (s"$applicationMode.microservice.services.$serviceName.host" -> "localhost")
-
-      updatedMap
-    }) ++ additionalConfig
-
-    val configMapUpdated = onConfigUpdating(configMap)
-    val config: Configuration = play.api.Configuration.from(configMapUpdated)
-
-
-    val application = new DefaultApplication(new File("."), this.getClass.getClassLoader, None, applicationMode) {
-      override def configuration: Configuration = super.configuration ++ config
-    }
-
-    val server = new NettyServer(new TestApplication(application), Some(servicePort), None, "127.0.0.1")
-
-    Runtime.getRuntime.addShutdownHook(new Thread {
-      override def run() {
-        server.stop()
-      }
-    })
-
-    server
-  }
-
-
-  // Give the tests a chance to access config before the application started
-  def onConfigUpdating(config: Map[String, Any]): Map[String, Any] = config
-
-  abstract override def start() {
-    super.start()
-    server
-  }
-
-  abstract override def stop() {
-    super.stop()
-    safelyStop("stopping Play server")(server.stop())
-  }
-
-  override def resource(url: String): String = s"http://localhost:$servicePort/${-/(url)}"
 }
 
 trait AdditionalConfigProvider {
