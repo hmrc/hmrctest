@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.play.it
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import uk.gov.hmrc.play.it.servicemanager.ServiceManagerClient
 
@@ -24,6 +24,7 @@ import scala.util.Properties._
 
 case class ExternalService(serviceName: String, runFrom: String, classifier: Option[String] = None, version: Option[String] = None)
 
+@Singleton
 class ExternalServiceRunner @Inject() (serviceManagerClient: ServiceManagerClient) {
   def runFromJar(serviceName: String, classifier: Option[String] = None) = {
     val runLatestReleases = envOrElse("IT_RUN_MODE", "").equals("LATEST_RELEASES")
