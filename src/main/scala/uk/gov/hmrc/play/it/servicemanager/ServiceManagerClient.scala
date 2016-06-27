@@ -21,8 +21,8 @@ import javax.inject.Inject
 import akka.stream.Materializer
 import org.asynchttpclient.DefaultAsyncHttpClientConfig
 import play.api.libs.json.Json
+import play.api.libs.ws.WSResponse
 import play.api.libs.ws.ahc.AhcWSClient
-import play.api.libs.ws.{WS, WSResponse}
 import uk.gov.hmrc.play.it.{ExternalService, TestId}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,7 +40,7 @@ class ServiceManagerClient @Inject() (implicit mat: Materializer) {
   implicit val stopRequestFormat = Json.format[ServiceManagementStopRequest]
   implicit val responseFormat = Json.format[ServiceManagementResponse]
   implicit val versionEnvironmentVariableFormat = Json.format[VersionEnvironmentVariable]
-  implicit lazy val client = new AhcWSClient(new DefaultAsyncHttpClientConfig.Builder().build)
+  lazy val client = new AhcWSClient(new DefaultAsyncHttpClientConfig.Builder().build)
 
   def start(testId: TestId, externalServices: Seq[ExternalService], timeout: Duration): Map[String, Int] = {
 
@@ -53,7 +53,7 @@ class ServiceManagerClient @Inject() (implicit mat: Materializer) {
         builder.build()
       })
 
-      val f = WS.clientUrl(serviceManagerStartUrl)(extendedTimeoutClient)
+      val f = extendedTimeoutClient.url(serviceManagerStartUrl)
         .withRequestTimeout(timeout)
         .post(Json.toJson(ServiceManagementStartRequest(testId.toString, externalServices)))
         .map { response: WSResponse =>
@@ -74,12 +74,12 @@ class ServiceManagerClient @Inject() (implicit mat: Materializer) {
   }
 
   def stop(testId: TestId, dropDatabases: Boolean) {
-    Await.result(WS.clientUrl(serviceManagerStopUrl)
+    Await.result(client.url(serviceManagerStopUrl)
       .post(Json.toJson(ServiceManagementStopRequest(testId.toString, dropDatabases))), 30.seconds)
   }
 
   def version_variable(service: String): VersionEnvironmentVariable = {
-    val versionEnvironmentVariable: Future[VersionEnvironmentVariable] = WS.clientUrl(serviceManagerVersionVariableUrl).withQueryString("service" -> service).get().map {
+    val versionEnvironmentVariable: Future[VersionEnvironmentVariable] = client.url(serviceManagerVersionVariableUrl).withQueryString("service" -> service).get().map {
       response: WSResponse =>
         response.json.validate[VersionEnvironmentVariable].fold(
           errors => throw new JsException("GET", s"$serviceManagerVersionVariableUrl?service=$service", response.body, classOf[VersionEnvironmentVariable], errors),
