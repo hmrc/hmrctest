@@ -17,9 +17,9 @@
 package uk.gov.hmrc.play.test
 
 import org.scalatest.{BeforeAndAfterAll, Suite}
-import play.api.test.FakeApplication
 import play.api.Play
 import play.api.test.Helpers._
+import play.api.test.FakeApplication
 
 /**
  * Use this instead of play.test.WithApplication
@@ -38,7 +38,7 @@ trait WithFakeApplication extends BeforeAndAfterAll {
 
   override def afterAll() {
     super.afterAll()
-    Play.stop()
+    Play.stop(fakeApplication)
   }
 
   def evaluateUsingPlay[T](block: => T): T = {
