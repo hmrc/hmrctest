@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.play.it.servicemanager
 
+import javax.inject.Inject
+
+import akka.stream.Materializer
 import org.asynchttpclient.DefaultAsyncHttpClientConfig
 import play.api.libs.json.Json
 import play.api.libs.ws.ahc.AhcWSClient
@@ -27,7 +30,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 
-object ServiceManagerClient {
+class ServiceManagerClient @Inject() (implicit mat: Materializer) {
 
   protected val serviceManagerStartUrl = "http://localhost:8085/start"
   protected val serviceManagerStopUrl = "http://localhost:8085/stop"

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.play.it
 
+import akka.stream.Materializer
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeUtils, DateTimeZone}
 import play.api._
@@ -44,16 +45,19 @@ trait ExternalServiceOrchestrator extends StartAndStopServer {
   import uk.gov.hmrc.play.it.SafelyStop._
   import uk.gov.hmrc.play.it.UrlHelper._
 
+  protected val serviceManagerClient: ServiceManagerClient
   protected def startTimeout: Duration = 60.seconds
 
-  protected lazy val externalServicePorts = ServiceManagerClient.start(testId, externalServices, startTimeout)
+  protected lazy val externalServicePorts = serviceManagerClient.start(testId, externalServices, startTimeout)
+
+  protected implicit val mat: Materializer
 
   override def start() {
     externalServicePorts
   }
 
   override def stop() {
-    safelyStop("stopping external services")(ServiceManagerClient.stop(testId, dropDatabasesAfterTest))
+    safelyStop("stopping external services")(serviceManagerClient.stop(testId, dropDatabasesAfterTest))
   }
 
   def externalResource(serviceName: String, path: String): String = {
