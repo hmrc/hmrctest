@@ -16,16 +16,20 @@
 
 package uk.gov.hmrc.play.test
 
-import org.scalatest.{OptionValues, WordSpecLike, Matchers}
+import java.nio.charset.Charset
+
+import akka.stream.Materializer
+import akka.util.ByteString
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
-import play.api.libs.iteratee.Iteratee
-import play.api.libs.json.{Json, JsValue}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait UnitSpec extends WordSpecLike with Matchers with OptionValues {
 
-  import scala.concurrent.{Await, Future}
   import scala.concurrent.duration._
+  import scala.concurrent.{Await, Future}
 
   implicit val defaultTimeout = 5 seconds
 
@@ -40,19 +44,25 @@ trait UnitSpec extends WordSpecLike with Matchers with OptionValues {
 
   def status(of: Future[Result])(implicit timeout: Duration): Int = status(Await.result(of, timeout))
 
-  def jsonBodyOf(result: Result): JsValue = {
+  def jsonBodyOf(result: Result)(implicit mat: Materializer): JsValue = {
     Json.parse(bodyOf(result))
   }
 
-  def jsonBodyOf(resultF:Future[Result]) :Future[JsValue] = {
+  def jsonBodyOf(resultF:Future[Result])(implicit mat: Materializer): Future[JsValue] = {
     resultF.map(jsonBodyOf)
   }
 
-  def bodyOf(result: Result) : String = {
-    new String(result.body.run(Iteratee.consume[Array[Byte]]()))
+  def bodyOf(result: Result)(implicit mat: Materializer): String = {
+    val bodyBytes: ByteString = await(result.body.consumeData)
+    // We use the default charset to preserve the behaviour of a previous
+    // version of this code, which used new String(Array[Byte]).
+    // If the fact that the previous version used the default charset was an
+    // accident then it may be better to decode in UTF-8 or the charset
+    // specified by the result's headers.
+    bodyBytes.decodeString(Charset.defaultCharset().name)
   }
 
-  def bodyOf(resultF: Future[Result]) : Future[String] = {
+  def bodyOf(resultF: Future[Result])(implicit mat: Materializer): Future[String] = {
     resultF.map(bodyOf)
   }
 }
