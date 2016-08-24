@@ -17,8 +17,9 @@
 package uk.gov.hmrc.play.test
 
 import org.scalatest.{BeforeAndAfterAll, Suite}
-import play.api.Play
+import play.api.{Application, Play}
 import play.api.test.Helpers._
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.FakeApplication
 
 /**
@@ -29,7 +30,9 @@ import play.api.test.FakeApplication
 trait WithFakeApplication extends BeforeAndAfterAll {
   this: Suite =>
 
-  lazy val fakeApplication = FakeApplication()
+  lazy val fakeApplication: Application = new GuiceApplicationBuilder().bindings(bindModules:_*).build()
+
+  def bindModules: Seq[GuiceableModule] = Seq()
 
   override def beforeAll() {
     super.beforeAll()

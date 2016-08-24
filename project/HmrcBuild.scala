@@ -26,7 +26,7 @@ object HmrcBuild extends Build {
   import uk.gov.hmrc.PublishingSettings._
   import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 
-  val appName = "hmrctest-25"
+  val appName = "hmrctest"
 
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning)
