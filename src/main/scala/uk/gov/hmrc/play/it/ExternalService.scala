@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 HM Revenue & Customs
+ * Copyright 2016 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ object ExternalService {
     val versionEnvironmentVariable = ServiceManagerClient.version_variable(serviceName)
     val version = envOrElse(versionEnvironmentVariable.variable, "")
 
-    if (!version.isEmpty)
+    if (version.nonEmpty)
       ExternalService(serviceName, "RELEASE_JAR", classifier, Some(version))
     else if (runLatestReleases)
       ExternalService(serviceName, "RELEASE_JAR", classifier)
     else
-      ExternalService(serviceName, "SNAPSHOT_JAR", classifier, Some("999-SNAPSHOT"))
+      ExternalService(serviceName, "SNAPSHOT_JAR", classifier)
   }
 
   def runFromSource(serviceName: String, classifier: Option[String] = None) = ExternalService(serviceName, "SOURCE", classifier)
