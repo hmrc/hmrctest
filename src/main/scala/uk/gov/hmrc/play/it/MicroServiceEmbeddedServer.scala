@@ -101,7 +101,8 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
     val config: Configuration = play.api.Configuration.from(configMapUpdated)
 
 
-    val application: Application = new GuiceApplicationBuilder(configuration = config).build()
+    val environment: Environment = Environment.simple(mode = applicationMode)
+    val application: Application = new GuiceApplicationBuilder(environment = environment, configuration = config).build()
 
     val serverConfig: ServerConfig = ServerConfig(rootDir = new File("."), port = Some(servicePort), address = "127.0.0.1")
     val server = NettyServer.fromApplication(application, serverConfig);
