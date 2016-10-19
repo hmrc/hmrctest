@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 HM Revenue & Customs
+ * Copyright 2016 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package uk.gov.hmrc.play.it.servicemanager
 
-import com.ning.http.client.{AsyncHttpClient, AsyncHttpClientConfig}
+import akka.stream.Materializer
+import org.asynchttpclient.DefaultAsyncHttpClientConfig
+import play.api.Play
+import play.api.Play.current
 import play.api.libs.json.Json
-import play.api.libs.ws.ning.{NingAsyncHttpClientConfigBuilder, NingWSClient}
-import play.api.libs.ws.{DefaultWSClientConfig, WS, WSResponse}
+import play.api.libs.ws.WSResponse
+import play.api.libs.ws.ahc.AhcWSClient
 import uk.gov.hmrc.play.it.{ExternalService, TestId}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,6 +32,8 @@ import scala.concurrent.{Await, Future}
 
 object ServiceManagerClient {
 
+  implicit val mat: Materializer = Play.materializer
+
   protected val serviceManagerStartUrl = "http://localhost:8085/start"
   protected val serviceManagerStopUrl = "http://localhost:8085/stop"
   private val serviceManagerVersionVariableUrl = "http://localhost:8085/version_variable"
@@ -37,46 +42,46 @@ object ServiceManagerClient {
   implicit val stopRequestFormat = Json.format[ServiceManagementStopRequest]
   implicit val responseFormat = Json.format[ServiceManagementResponse]
   implicit val versionEnvironmentVariableFormat = Json.format[VersionEnvironmentVariable]
-  implicit lazy val client = new NingWSClient(new AsyncHttpClient().getConfig)
+  lazy val client = new AhcWSClient(new DefaultAsyncHttpClientConfig.Builder().build)
 
   def start(testId: TestId, externalServices: Seq[ExternalService], timeout: Duration): Map[String, Int] = {
 
     if (externalServices.isEmpty)
       Map.empty
     else {
-      val extendedTimeoutClient = new NingWSClient({
-        val builder = new AsyncHttpClientConfig.Builder(new NingAsyncHttpClientConfigBuilder(new DefaultWSClientConfig()).build())
-        builder.setIdleConnectionTimeoutInMs(timeout.toMillis.toInt)
+      val extendedTimeoutClient = new AhcWSClient({
+        val builder = new DefaultAsyncHttpClientConfig.Builder()
+        builder.setPooledConnectionIdleTimeout(timeout.toMillis.toInt)
         builder.build()
       })
 
-      val f = WS.clientUrl(serviceManagerStartUrl)(extendedTimeoutClient)
-        .withRequestTimeout(timeout.toMillis.toInt)
+      val f = extendedTimeoutClient.url(serviceManagerStartUrl)
+        .withRequestTimeout(timeout)
         .post(Json.toJson(ServiceManagementStartRequest(testId.toString, externalServices)))
         .map { response: WSResponse =>
 
           if (response.status >= 200 && response.status <= 299) {
             val servicePorts: Seq[ServiceManagementResponse] = response.json.validate[Seq[ServiceManagementResponse]].fold(
-            errs => throw new JsException("POST", serviceManagerStartUrl, response.body, classOf[Seq[ServiceManagementResponse]], errs),
-            valid => valid)
+              errs => throw new JsException("POST", serviceManagerStartUrl, response.body, classOf[Seq[ServiceManagementResponse]], errs),
+              valid => valid)
 
             servicePorts.map(s => s.serviceName -> s.port).toMap
           } else {
-            throw new RuntimeException(s"Received unexpected response from ServiceManager: ${response.status}\n\n" + response.body )
+            throw new RuntimeException(s"Received unexpected response from ServiceManager: ${response.status}\n\n" + response.body)
           }
-      }
+        }
 
       Await.result(f.andThen { case _ => extendedTimeoutClient.close() }, 5.minutes)
     }
   }
 
   def stop(testId: TestId, dropDatabases: Boolean) {
-    Await.result(WS.clientUrl(serviceManagerStopUrl)
+    Await.result(client.url(serviceManagerStopUrl)
       .post(Json.toJson(ServiceManagementStopRequest(testId.toString, dropDatabases))), 30.seconds)
   }
 
   def version_variable(service: String): VersionEnvironmentVariable = {
-    val versionEnvironmentVariable: Future[VersionEnvironmentVariable] = WS.clientUrl(serviceManagerVersionVariableUrl).withQueryString("service" -> service).get().map {
+    val versionEnvironmentVariable: Future[VersionEnvironmentVariable] = client.url(serviceManagerVersionVariableUrl).withQueryString("service" -> service).get().map {
       response: WSResponse =>
         response.json.validate[VersionEnvironmentVariable].fold(
           errors => throw new JsException("GET", s"$serviceManagerVersionVariableUrl?service=$service", response.body, classOf[VersionEnvironmentVariable], errors),

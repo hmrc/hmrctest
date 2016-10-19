@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 HM Revenue & Customs
+ * Copyright 2016 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ package uk.gov.hmrc.play.it
 
 import java.io.File
 
+import akka.stream.Materializer
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeUtils, DateTimeZone}
 import play.api._
-import play.core.TestApplication
-import play.core.server.NettyServer
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.core.server.{NettyServer, ServerConfig}
 import uk.gov.hmrc.play.it.servicemanager.ServiceManagerClient
 
 import scala.concurrent.duration._
@@ -97,11 +98,11 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
     val config: Configuration = play.api.Configuration.from(configMapUpdated)
 
 
-    val application = new DefaultApplication(new File("."), this.getClass.getClassLoader, None, applicationMode) {
-      override def configuration: Configuration = super.configuration ++ config
-    }
+    val environment: Environment = Environment.simple(mode = applicationMode)
+    val application: Application = new GuiceApplicationBuilder(environment = environment, configuration = config).build()
 
-    val server = new NettyServer(new TestApplication(application), Some(servicePort), None, "127.0.0.1")
+    val serverConfig: ServerConfig = ServerConfig(rootDir = new File("."), port = Some(servicePort), address = "127.0.0.1")
+    val server = NettyServer.fromApplication(application, serverConfig);
 
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run() {

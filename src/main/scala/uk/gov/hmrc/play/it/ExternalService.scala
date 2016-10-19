@@ -17,11 +17,12 @@
 package uk.gov.hmrc.play.it
 
 import uk.gov.hmrc.play.it.servicemanager.ServiceManagerClient
+
 import scala.util.Properties._
 
 case class ExternalService(serviceName: String, runFrom: String, classifier: Option[String] = None, version: Option[String] = None)
 
-object ExternalService {
+object ExternalServiceRunner {
   def runFromJar(serviceName: String, classifier: Option[String] = None) = {
     val runLatestReleases = envOrElse("IT_RUN_MODE", "").equals("LATEST_RELEASES")
     val versionEnvironmentVariable = ServiceManagerClient.version_variable(serviceName)

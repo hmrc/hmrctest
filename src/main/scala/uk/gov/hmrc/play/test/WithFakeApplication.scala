@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 HM Revenue & Customs
+ * Copyright 2016 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package uk.gov.hmrc.play.test
 
 import org.scalatest.{BeforeAndAfterAll, Suite}
-import play.api.test.FakeApplication
-import play.api.Play
+import play.api.{Application, Play}
 import play.api.test.Helpers._
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.test.FakeApplication
 
 /**
  * Use this instead of play.test.WithApplication
@@ -29,7 +30,9 @@ import play.api.test.Helpers._
 trait WithFakeApplication extends BeforeAndAfterAll {
   this: Suite =>
 
-  lazy val fakeApplication = FakeApplication()
+  lazy val fakeApplication: Application = new GuiceApplicationBuilder().bindings(bindModules:_*).build()
+
+  def bindModules: Seq[GuiceableModule] = Seq()
 
   override def beforeAll() {
     super.beforeAll()
@@ -38,7 +41,7 @@ trait WithFakeApplication extends BeforeAndAfterAll {
 
   override def afterAll() {
     super.afterAll()
-    Play.stop()
+    Play.stop(fakeApplication)
   }
 
   def evaluateUsingPlay[T](block: => T): T = {
