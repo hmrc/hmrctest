@@ -57,8 +57,6 @@ trait ExternalServiceOrchestrator extends StartAndStopServer {
 
   protected lazy val externalServicePorts = ServiceManagerClient.start(testId, externalServices, startTimeout)
 
-  protected implicit val mat: Materializer
-
   override def start() {
     externalServicePorts
   }
@@ -72,7 +70,7 @@ trait ExternalServiceOrchestrator extends StartAndStopServer {
     s"http://localhost:$port/${-/(path)}"
   }
 }
- 
+
 trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServer {
 
   self: IntegrationTestConfiguration with ExternalServiceOrchestrator =>
