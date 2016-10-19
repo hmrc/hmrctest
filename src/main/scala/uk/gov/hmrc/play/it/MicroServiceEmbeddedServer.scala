@@ -53,10 +53,9 @@ trait ExternalServiceOrchestrator extends StartAndStopServer {
   import uk.gov.hmrc.play.it.SafelyStop._
   import uk.gov.hmrc.play.it.UrlHelper._
 
-  protected val serviceManagerClient: ServiceManagerClient
   protected def startTimeout: Duration = 60.seconds
 
-  protected lazy val externalServicePorts = serviceManagerClient.start(testId, externalServices, startTimeout)
+  protected lazy val externalServicePorts = ServiceManagerClient.start(testId, externalServices, startTimeout)
 
   protected implicit val mat: Materializer
 
@@ -65,7 +64,7 @@ trait ExternalServiceOrchestrator extends StartAndStopServer {
   }
 
   override def stop() {
-    safelyStop("stopping external services")(serviceManagerClient.stop(testId, dropDatabasesAfterTest))
+    safelyStop("stopping external services")(ServiceManagerClient.stop(testId, dropDatabasesAfterTest))
   }
 
   def externalResource(serviceName: String, path: String): String = {
@@ -73,7 +72,7 @@ trait ExternalServiceOrchestrator extends StartAndStopServer {
     s"http://localhost:$port/${-/(path)}"
   }
 }
-
+ 
 trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServer {
 
   self: IntegrationTestConfiguration with ExternalServiceOrchestrator =>

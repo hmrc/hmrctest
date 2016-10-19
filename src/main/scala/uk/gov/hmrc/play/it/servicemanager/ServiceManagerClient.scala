@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.play.it.servicemanager
 
-import javax.inject.{Inject, Singleton}
-
 import akka.stream.Materializer
 import org.asynchttpclient.DefaultAsyncHttpClientConfig
+import play.api.Play
+import play.api.Play.current
 import play.api.libs.json.Json
 import play.api.libs.ws.WSResponse
 import play.api.libs.ws.ahc.AhcWSClient
@@ -30,8 +30,9 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 
-@Singleton
-class ServiceManagerClient @Inject() (implicit mat: Materializer) {
+object ServiceManagerClient {
+
+  implicit val mat: Materializer = Play.materializer
 
   protected val serviceManagerStartUrl = "http://localhost:8085/start"
   protected val serviceManagerStopUrl = "http://localhost:8085/stop"
@@ -61,14 +62,14 @@ class ServiceManagerClient @Inject() (implicit mat: Materializer) {
 
           if (response.status >= 200 && response.status <= 299) {
             val servicePorts: Seq[ServiceManagementResponse] = response.json.validate[Seq[ServiceManagementResponse]].fold(
-            errs => throw new JsException("POST", serviceManagerStartUrl, response.body, classOf[Seq[ServiceManagementResponse]], errs),
-            valid => valid)
+              errs => throw new JsException("POST", serviceManagerStartUrl, response.body, classOf[Seq[ServiceManagementResponse]], errs),
+              valid => valid)
 
             servicePorts.map(s => s.serviceName -> s.port).toMap
           } else {
-            throw new RuntimeException(s"Received unexpected response from ServiceManager: ${response.status}\n\n" + response.body )
+            throw new RuntimeException(s"Received unexpected response from ServiceManager: ${response.status}\n\n" + response.body)
           }
-      }
+        }
 
       Await.result(f.andThen { case _ => extendedTimeoutClient.close() }, 5.minutes)
     }
