@@ -17,15 +17,15 @@
 package uk.gov.hmrc.play.it
 
 import java.io.File
-
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeUtils, DateTimeZone}
 import play.api._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.core.server.{NettyServer, ServerConfig}
-import uk.gov.hmrc.play.it.servicemanager.ServiceManagerClient
 
+import uk.gov.hmrc.play.it.servicemanager.ServiceManagerClient
 import scala.concurrent.duration._
+import scala.sys.addShutdownHook
 
 trait ExternalServicesServer extends IntegrationTestConfiguration with ExternalServiceOrchestrator
 
@@ -103,12 +103,7 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
 
     val serverConfig: ServerConfig = ServerConfig(rootDir = new File("."), port = Some(servicePort), address = "127.0.0.1")
     val server = NettyServer.fromApplication(application, serverConfig)
-
-    Runtime.getRuntime.addShutdownHook(new Thread {
-      override def run() {
-        server.stop()
-      }
-    })
+    addShutdownHook(server.stop)
 
     server
   }

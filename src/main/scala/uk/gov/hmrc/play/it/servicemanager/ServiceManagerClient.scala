@@ -27,12 +27,14 @@ import uk.gov.hmrc.play.it.{ExternalService, TestId}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import scala.sys.addShutdownHook
 
 
 object ServiceManagerClient {
 
   implicit val system = ActorSystem("serviceManagerClient")
-  implicit def mat: Materializer = ActorMaterializer()
+  addShutdownHook(system.terminate)
+  implicit val mat = ActorMaterializer()
 
   protected val serviceManagerStartUrl = "http://localhost:8085/start"
   protected val serviceManagerStopUrl = "http://localhost:8085/stop"
