@@ -18,7 +18,6 @@ package uk.gov.hmrc.play.it
 
 import java.io.File
 
-import akka.stream.Materializer
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeUtils, DateTimeZone}
 import play.api._
@@ -100,9 +99,10 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
 
     val environment: Environment = Environment.simple(mode = applicationMode)
     val application: Application = new GuiceApplicationBuilder(environment = environment, configuration = config).build()
+    Play.start(application)
 
     val serverConfig: ServerConfig = ServerConfig(rootDir = new File("."), port = Some(servicePort), address = "127.0.0.1")
-    val server = NettyServer.fromApplication(application, serverConfig);
+    val server = NettyServer.fromApplication(application, serverConfig)
 
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run() {

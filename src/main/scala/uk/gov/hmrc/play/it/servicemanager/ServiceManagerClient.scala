@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.play.it.servicemanager
 
-import akka.stream.Materializer
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, Materializer}
 import org.asynchttpclient.DefaultAsyncHttpClientConfig
-import play.api.Play
-import play.api.Play.current
 import play.api.libs.json.Json
 import play.api.libs.ws.WSResponse
 import play.api.libs.ws.ahc.AhcWSClient
-import uk.gov.hmrc.play.it.{ExternalService, TestId}
 
+import uk.gov.hmrc.play.it.{ExternalService, TestId}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -32,7 +31,8 @@ import scala.concurrent.{Await, Future}
 
 object ServiceManagerClient {
 
-  implicit val mat: Materializer = Play.materializer
+  implicit val system = ActorSystem("serviceManagerClient")
+  implicit def mat: Materializer = ActorMaterializer()
 
   protected val serviceManagerStartUrl = "http://localhost:8085/start"
   protected val serviceManagerStopUrl = "http://localhost:8085/stop"
