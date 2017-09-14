@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@
 package uk.gov.hmrc.play.it
 
 import java.io.File
+
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeUtils, DateTimeZone}
+import play.api
 import play.api._
-import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceApplicationLoader}
 import play.core.server.{NettyServer, ServerConfig}
-
 import uk.gov.hmrc.play.it.servicemanager.ServiceManagerClient
+
 import scala.concurrent.duration._
 import scala.sys.addShutdownHook
 
@@ -93,12 +95,15 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
       updatedMap
     }) ++ additionalConfig
 
-    val configMapUpdated = onConfigUpdating(configMap)
+    val configMapUpdated = onConfigUpdating(configMap).mapValues(_.asInstanceOf[AnyRef])
     val config: Configuration = play.api.Configuration.from(configMapUpdated)
 
 
     val environment: Environment = Environment.simple(mode = applicationMode)
-    val application: Application = new GuiceApplicationBuilder(environment = environment, configuration = config).build()
+
+    val context = api.ApplicationLoader.createContext(environment, initialSettings = configMapUpdated)
+    val application = ApplicationLoader(context).load(context)
+
     Play.start(application)
 
     val serverConfig: ServerConfig = ServerConfig(rootDir = new File("."), port = Some(servicePort), address = "127.0.0.1")
