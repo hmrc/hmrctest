@@ -32,8 +32,6 @@ object HmrcBuild extends Build {
     .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning)
     .settings(
       libraryDependencies ++= AppDependencies(),
-      scalaVersion := "2.11.7",
-      crossScalaVersions := Seq("2.11.7"),
       resolvers := Seq(
         Resolver.bintrayRepo("hmrc", "releases"),
         "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/"
@@ -49,10 +47,10 @@ private object AppDependencies {
   val compile = Seq(
     ws % "provided",
 
-    "org.scalatest" %% "scalatest" % "2.2.4",
+    "org.scalatest" %% "scalatest" % "3.0.1",
     "com.typesafe.play" %% "play-test" % PlayVersion.current,
     "ch.qos.logback" % "logback-classic" % "1.1.2",
-    "org.pegdown" % "pegdown" % "1.5.0"
+    "org.pegdown" % "pegdown" % "1.6.0"
 
   )
 
