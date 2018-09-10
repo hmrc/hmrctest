@@ -53,7 +53,7 @@ object ServiceManagerClient {
     else {
       val extendedTimeoutClient = new AhcWSClient({
         val builder = new DefaultAsyncHttpClientConfig.Builder()
-        builder.setPooledConnectionIdleTimeout(timeout.toMillis.toInt)
+        builder.setPooledConnectionIdleTimeout(timeout.toMillis.toInt).setReadTimeout(timeout.toMillis.toInt)
         builder.build()
       })
 
