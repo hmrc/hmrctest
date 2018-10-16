@@ -1,8 +1,8 @@
 import sbt._
 
-val appName = "hmrctest"
+val libName = "hmrctest"
 
-lazy val microservice = Project(appName, file("."))
+lazy val library = Project(libName, file("."))
   .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning, SbtAutoBuildPlugin)
   .settings(
     majorVersion := 3,
