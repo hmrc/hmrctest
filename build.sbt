@@ -3,7 +3,7 @@ import sbt._
 val libName = "hmrctest"
 
 lazy val library = Project(libName, file("."))
-  .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning, SbtAutoBuildPlugin)
+  .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning, SbtArtifactory)
   .settings(
     majorVersion := 3,
     scalaVersion := "2.11.12",
