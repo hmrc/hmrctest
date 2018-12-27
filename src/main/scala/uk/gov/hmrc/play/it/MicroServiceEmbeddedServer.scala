@@ -89,8 +89,8 @@ trait EmbeddedServiceOrchestrator extends ResourceProvider with StartAndStopServ
       Logger.debug(s"External service '$serviceName' is running on port: $port")
 
       val updatedMap = map +
-        (s"$applicationMode.microservice.services.$serviceName.port" -> new Integer(port)) +
-        (s"$applicationMode.microservice.services.$serviceName.host" -> "localhost")
+        (s"microservice.services.$serviceName.port" -> new Integer(port)) +
+        (s"microservice.services.$serviceName.host" -> "localhost")
 
       updatedMap
     }) ++ additionalConfig
@@ -141,7 +141,7 @@ trait MongoTestConfiguration extends AdditionalConfigProvider {
   val dbName: String = testId.toString
 
   abstract override protected def additionalConfig =
-    super.additionalConfig + (s"$applicationMode.microservice.mongodb.uri" -> s"mongodb://localhost:27017/$dbName")
+    super.additionalConfig + ("microservice.mongodb.uri" -> s"mongodb://localhost:27017/$dbName")
 }
 
 object UrlHelper {
