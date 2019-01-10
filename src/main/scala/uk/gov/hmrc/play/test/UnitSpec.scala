@@ -25,22 +25,23 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.implicitConversions
 
 trait UnitSpec extends WordSpecLike with Matchers with OptionValues {
 
   import scala.concurrent.duration._
   import scala.concurrent.{Await, Future}
 
-  implicit val defaultTimeout = 5 seconds
+  implicit val defaultTimeout: FiniteDuration = 5 seconds
 
-  implicit def extractAwait[A](future: Future[A]) = await[A](future)
+  implicit def extractAwait[A](future: Future[A]): A = await[A](future)
 
-  def await[A](future: Future[A])(implicit timeout: Duration) = Await.result(future, timeout)
+  def await[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 
   // Convenience to avoid having to wrap andThen() parameters in Future.successful
-  implicit def liftFuture[A](v: A) = Future.successful(v)
+  implicit def liftFuture[A](v: A): Future[A] = Future.successful(v)
 
-  def status(of: Result) = of.header.status
+  def status(of: Result): Int = of.header.status
 
   def status(of: Future[Result])(implicit timeout: Duration): Int = status(Await.result(of, timeout))
 
@@ -48,7 +49,7 @@ trait UnitSpec extends WordSpecLike with Matchers with OptionValues {
     Json.parse(bodyOf(result))
   }
 
-  def jsonBodyOf(resultF:Future[Result])(implicit mat: Materializer): Future[JsValue] = {
+  def jsonBodyOf(resultF: Future[Result])(implicit mat: Materializer): Future[JsValue] = {
     resultF.map(jsonBodyOf)
   }
 
