@@ -19,14 +19,14 @@ package uk.gov.hmrc.play.it.servicemanager
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import play.api.libs.json.Json
-import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
+import play.api.libs.ws.{WSClient, WSClientConfig, WSResponse}
 import uk.gov.hmrc.play.it.{ExternalService, TestId}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.sys.addShutdownHook
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object ServiceManagerClient {
@@ -35,22 +35,28 @@ object ServiceManagerClient {
   addShutdownHook(system.terminate)
   implicit val mat = ActorMaterializer()
 
-  protected val serviceManagerStartUrl = "http://localhost:8085/start"
-  protected val serviceManagerStopUrl           = "http://localhost:8085/stop"
-  private val serviceManagerVersionVariableUrl  = "http://localhost:8085/version_variable"
-  implicit val externalServiceFormat            = Json.format[ExternalService]
-  implicit val startRequestFormat               = Json.format[ServiceManagementStartRequest]
-  implicit val stopRequestFormat                = Json.format[ServiceManagementStopRequest]
-  implicit val responseFormat                   = Json.format[ServiceManagementResponse]
-  implicit val versionEnvironmentVariableFormat = Json.format[VersionEnvironmentVariable]
-  lazy val client: WSClient                  =  AhcWSClient()
+  protected val serviceManagerStartUrl           = "http://localhost:8085/start"
+  protected val serviceManagerStopUrl            = "http://localhost:8085/stop"
+  private   val serviceManagerVersionVariableUrl = "http://localhost:8085/version_variable"
+  implicit  val externalServiceFormat            = Json.format[ExternalService]
+  implicit  val startRequestFormat               = Json.format[ServiceManagementStartRequest]
+  implicit  val stopRequestFormat                = Json.format[ServiceManagementStopRequest]
+  implicit  val responseFormat                   = Json.format[ServiceManagementResponse]
+  implicit  val versionEnvironmentVariableFormat = Json.format[VersionEnvironmentVariable]
+  lazy      val client: WSClient                 = AhcWSClient()
 
   def start(testId: TestId, externalServices: Seq[ExternalService], timeout: Duration): Map[String, Int] = {
 
     if (externalServices.isEmpty)
       Map.empty
     else {
-      val extendedTimeoutClient:WSClient =  AhcWSClient(AhcWSClientConfig(idleConnectionInPoolTimeout = timeout))
+      val extendedTimeoutClient: WSClient =
+        AhcWSClient(
+          AhcWSClientConfig(
+            wsClientConfig = WSClientConfig(idleTimeout = timeout),
+            idleConnectionInPoolTimeout = timeout
+          )
+        )
 
       val f = extendedTimeoutClient.url(serviceManagerStartUrl)
         .withRequestTimeout(timeout)
@@ -73,8 +79,9 @@ object ServiceManagerClient {
   }
 
   def stop(testId: TestId, dropDatabases: Boolean) {
-    Await.result(client.url(serviceManagerStopUrl)
-      .post(Json.toJson(ServiceManagementStopRequest(testId.toString, dropDatabases))), 30.seconds)
+    Await.result(
+      client.url(serviceManagerStopUrl)
+        .post(Json.toJson(ServiceManagementStopRequest(testId.toString, dropDatabases))), 30.seconds)
   }
 
   def version_variable(service: String): VersionEnvironmentVariable = {
