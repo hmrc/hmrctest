@@ -1,4 +1,4 @@
-import sbt._
+import PlayCrossCompilation._
 
 val libName = "hmrctest"
 
@@ -8,5 +8,6 @@ lazy val library = Project(libName, file("."))
     majorVersion := 3,
     scalaVersion := "2.11.12",
     makePublicallyAvailableOnBintray := true,
-    libraryDependencies ++= LibDependencies.compile
+    libraryDependencies ++= LibDependencies.compile,
+    playCrossCompilationSettings
   )

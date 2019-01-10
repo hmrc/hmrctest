@@ -17,17 +17,16 @@
 package uk.gov.hmrc.play.it.servicemanager
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-import org.asynchttpclient.DefaultAsyncHttpClientConfig
+import akka.stream.ActorMaterializer
 import play.api.libs.json.Json
-import play.api.libs.ws.WSResponse
-import play.api.libs.ws.ahc.AhcWSClient
-
+import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import uk.gov.hmrc.play.it.{ExternalService, TestId}
-import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.sys.addShutdownHook
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object ServiceManagerClient {
@@ -37,25 +36,21 @@ object ServiceManagerClient {
   implicit val mat = ActorMaterializer()
 
   protected val serviceManagerStartUrl = "http://localhost:8085/start"
-  protected val serviceManagerStopUrl = "http://localhost:8085/stop"
-  private val serviceManagerVersionVariableUrl = "http://localhost:8085/version_variable"
-  implicit val externalServiceFormat = Json.format[ExternalService]
-  implicit val startRequestFormat = Json.format[ServiceManagementStartRequest]
-  implicit val stopRequestFormat = Json.format[ServiceManagementStopRequest]
-  implicit val responseFormat = Json.format[ServiceManagementResponse]
+  protected val serviceManagerStopUrl           = "http://localhost:8085/stop"
+  private val serviceManagerVersionVariableUrl  = "http://localhost:8085/version_variable"
+  implicit val externalServiceFormat            = Json.format[ExternalService]
+  implicit val startRequestFormat               = Json.format[ServiceManagementStartRequest]
+  implicit val stopRequestFormat                = Json.format[ServiceManagementStopRequest]
+  implicit val responseFormat                   = Json.format[ServiceManagementResponse]
   implicit val versionEnvironmentVariableFormat = Json.format[VersionEnvironmentVariable]
-  lazy val client = new AhcWSClient(new DefaultAsyncHttpClientConfig.Builder().build)
+  lazy val client: WSClient                  =  AhcWSClient()
 
   def start(testId: TestId, externalServices: Seq[ExternalService], timeout: Duration): Map[String, Int] = {
 
     if (externalServices.isEmpty)
       Map.empty
     else {
-      val extendedTimeoutClient = new AhcWSClient({
-        val builder = new DefaultAsyncHttpClientConfig.Builder()
-        builder.setPooledConnectionIdleTimeout(timeout.toMillis.toInt).setReadTimeout(timeout.toMillis.toInt)
-        builder.build()
-      })
+      val extendedTimeoutClient:WSClient =  AhcWSClient(AhcWSClientConfig(idleConnectionInPoolTimeout = timeout))
 
       val f = extendedTimeoutClient.url(serviceManagerStartUrl)
         .withRequestTimeout(timeout)
