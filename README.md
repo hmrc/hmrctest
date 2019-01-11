@@ -8,7 +8,7 @@ In order to use the classes from the `uk.gov.hmrc.play.it` package, you need to 
 
 ## Adding to your service
 
-Include the one of the following dependencies in your SBT build based on whether
+Include one of the following dependencies in your SBT build based on whether
 you are using Play 2.5 or Play 2.6
 
 ```scala
