@@ -8,12 +8,15 @@ In order to use the classes from the `uk.gov.hmrc.play.it` package, you need to 
 
 ## Adding to your service
 
-Include the following dependency in your SBT build
+Include one of the following dependencies in your SBT build based on whether
+you are using Play 2.5 or Play 2.6
 
 ```scala
 resolvers += Resolver.bintrayRepo("hmrc", "releases")
 
-libraryDependencies += "uk.gov.hmrc" %% "hmrctest" % "x.x.x" % "test"
+libraryDependencies += "uk.gov.hmrc" %% "hmrctest" % "x.x.x-play-25" % "test"
+or
+libraryDependencies += "uk.gov.hmrc" %% "hmrctest" % "x.x.x-play-26" % "test"
 ```
 
 Optionally, to make hmrctest-provided components available for dependency injection, add the following to your reference.conf:

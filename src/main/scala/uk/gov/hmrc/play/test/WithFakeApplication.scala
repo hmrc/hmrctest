@@ -20,7 +20,6 @@ import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.{Application, Play}
 import play.api.test.Helpers._
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import play.api.test.FakeApplication
 
 /**
  * Use this instead of play.test.WithApplication
