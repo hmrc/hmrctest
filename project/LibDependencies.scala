@@ -9,11 +9,11 @@ private object LibDependencies {
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "org.pegdown" % "pegdown" % "1.6.0",
       // force dependencies due to security flaws found in jackson-databind < 2.9.x using XRay
-      "com.fasterxml.jackson.core"     % "jackson-core"            % "2.9.7",
-      "com.fasterxml.jackson.core"     % "jackson-databind"        % "2.9.7",
-      "com.fasterxml.jackson.core"     % "jackson-annotations"     % "2.9.7",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8"   % "2.9.7",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.7"
+      "com.fasterxml.jackson.core"     % "jackson-core"            % "2.9.8",
+      "com.fasterxml.jackson.core"     % "jackson-databind"        % "2.9.8",
+      "com.fasterxml.jackson.core"     % "jackson-annotations"     % "2.9.8",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8"   % "2.9.8",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.8"
     ),
     play25 = Seq(
       "com.typesafe.play" %% "play-ws" % play25Version % "provided",
