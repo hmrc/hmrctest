@@ -3,7 +3,7 @@ hmrctest (Deprecated)
 hmrctest will no longer be supported.  If you are considering using hmrctest for integration testing (with sm server), please use the [service-integration-test](https://github.com/hmrc/service-integration-test) library.
 
 
-[![Build Status](https://travis-ci.org/hmrc/hmrctest.svg)](https://travis-ci.org/hmrc/hmrctest) [ ![Download](https://api.bintray.com/packages/hmrc/releases/hmrctest/images/download.svg) ](https://bintray.com/hmrc/releases/hmrctest/_latestVersion)
+
 
 hmrctest is a Scala library providing some useful functionality for unit and integration tests.
 
